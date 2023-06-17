@@ -2,13 +2,13 @@ package ch.heigvd.pdl.refactoring;
 
 public class OrdersWriter {
 
-    private Orders orders;
+//    private Orders orders;
 
-    public OrdersWriter(Orders orders) {
-        this.orders = orders;
-    }
+//    public OrdersWriter(Orders orders) {
+//        this.orders = orders;
+//    }
 
-    public String getContents() {
+    public String getContents(Orders orders) {
         StringBuilder sb = new StringBuilder("{\"orders\": [");
 
         for (int i = 0; i < orders.getOrdersCount(); i++) {

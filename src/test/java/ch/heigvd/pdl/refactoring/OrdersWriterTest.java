@@ -6,44 +6,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrdersWriterTest {
     Orders orders = new Orders();
-    Order order111 = new Order(111);
+    Order order0;
 
     @BeforeEach
     public void SetupOneOrder() {
-        orders.addOrder(order111);
+        // The counter has to be reset before each test since each test is run in parallel with a different context (thus different order ids)
+        Order.resetIdCounter();
+        order0 = new Order();
+        orders.addOrder(order0);
     }
 
     @Test
     void NoOrder() {
-        assertEquals("{\"orders\": []}", new OrdersWriter(new Orders()).getContents());
+        assertEquals("{\"orders\": []}", new OrdersWriter().getContents(new Orders()));
     }
 
     @Test
     void OneOrder() {
-        String order111 = "{\"id\": 111, \"products\": []}";
-        assertEquals("{\"orders\": [" + order111 + "]}", new OrdersWriter(orders).getContents());
+        String order0 = "{\"id\": 0, \"products\": []}";
+        assertEquals("{\"orders\": [" + order0 + "]}", new OrdersWriter().getContents(orders));
     }
 
     @Test
     void TwoOrders() {
-        orders.addOrder(new Order(222));
-        String order111Json = JsonOrder111WithProduct("");
-        String order222Json = "{\"id\": 222, \"products\": []}";
-        assertEquals("{\"orders\": [" + order111Json + ", " + order222Json + "]}", new OrdersWriter(orders).getContents());
+        orders.addOrder(new Order());
+        String order0Json = JsonOrder0WithProduct("");
+        String order1Json = "{\"id\": 1, \"products\": []}";
+        assertEquals("{\"orders\": [" + order0Json + ", " + order1Json + "]}", new OrdersWriter().getContents(orders));
     }
 
     @Test
     void OneOrderWithOneProduct() {
-        order111.addProduct(new Product("Shirt", Color.BLUE, Size.M, 2.99, "TWD"));
-        String order111Json = JsonOrder111WithProduct("{\"code\": \"Shirt\", \"color\": \"blue\", \"size\": \"M\", \"price\": 2.99, \"currency\": \"TWD\"}");
-        assertEquals("{\"orders\": [" + order111Json + "]}", new OrdersWriter(orders).getContents());
+        order0.addProduct(new Product("Shirt", Color.BLUE, Size.M, 2.99, "TWD"));
+        String order0Json = JsonOrder0WithProduct("{\"code\": \"Shirt\", \"color\": \"blue\", \"size\": \"M\", \"price\": 2.99, \"currency\": \"TWD\"}");
+        assertEquals("{\"orders\": [" + order0Json + "]}", new OrdersWriter().getContents(orders));
     }
 
     @Test
     void OneOrderWithOneProductNoSize() {
-        order111.addProduct(new Product("Pot", Color.RED, Size.NO_SIZE, 16.50, "SGD"));
-        String order111Json = JsonOrder111WithProduct("{\"code\": \"Pot\", \"color\": \"red\", \"price\": 16.5, \"currency\": \"SGD\"}");
-        assertEquals("{\"orders\": [" + order111Json + "]}", new OrdersWriter(orders).getContents());
+        order0.addProduct(new Product("Pot", Color.RED, Size.NO_SIZE, 16.50, "SGD"));
+        String order0Json = JsonOrder0WithProduct("{\"code\": \"Pot\", \"color\": \"red\", \"price\": 16.5, \"currency\": \"SGD\"}");
+        assertEquals("{\"orders\": [" + order0Json + "]}", new OrdersWriter().getContents(orders));
     }
 
     @Test
@@ -58,8 +61,8 @@ class OrdersWriterTest {
         assertEquals(Size.NO_SIZE, p.getSize());
     }
 
-    private String JsonOrder111WithProduct(String productJson) {
-        return "{\"id\": 111, \"products\": [" + productJson + "]}";
+    private String JsonOrder0WithProduct(String productJson) {
+        return "{\"id\": 0, \"products\": [" + productJson + "]}";
     }
 
 }
