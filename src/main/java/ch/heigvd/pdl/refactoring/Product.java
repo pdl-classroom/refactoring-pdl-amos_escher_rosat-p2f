@@ -41,8 +41,6 @@ enum Size {
 
 public class Product {
 
-    public static final int SIZE_NOT_APPLICABLE = -1;
-
     private String code;
     private Color color;
     private Size size;
