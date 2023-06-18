@@ -1,5 +1,8 @@
 package ch.heigvd.pdl.refactoring;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class OrdersWriter {
 
 //    private Orders orders;
@@ -8,53 +11,71 @@ public class OrdersWriter {
 //        this.orders = orders;
 //    }
 
-    public String getContents(Orders orders) {
-        StringBuilder sb = new StringBuilder("{\"orders\": [");
+    private OrdersWriter() {
+    }
 
-        for (int i = 0; i < orders.getOrdersCount(); i++) {
-            Order order = orders.getOrder(i);
-            sb.append("{");
-            sb.append("\"id\": ");
-            sb.append(order.getOrderId());
-            sb.append(", ");
-            sb.append("\"products\": [");
-            for (int j = 0; j < order.getProductsCount(); j++) {
-                Product product = order.getProduct(j);
-
-                sb.append("{");
-                sb.append("\"code\": \"");
-                sb.append(product.getCode());
-                sb.append("\", ");
-                sb.append("\"color\": \"");
-                sb.append(product.getColor());
-                sb.append("\", ");
-
-                if (product.getSize() != Size.NO_SIZE) {
-                    sb.append("\"size\": \"");
-                    sb.append(product.getSize());
-                    sb.append("\", ");
-                }
-
-                sb.append("\"price\": ");
-                sb.append(product.getPrice());
-                sb.append(", ");
-                sb.append("\"currency\": \"");
-                sb.append(product.getCurrency());
-                sb.append("\"}, ");
+    public static String getContents(Orders orders) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            JSONArray orderArray = new JSONArray();
+            for (int i = 0; i < orders.getOrdersCount(); i++) {
+                Order order = orders.getOrder(i);
+                orderArray.put(getOrder(order));
             }
-
-            if (order.getProductsCount() > 0) {
-                sb.delete(sb.length() - 2, sb.length());
-            }
-
-            sb.append("]");
-            sb.append("}, ");
+            JSONObject jsonOrders = new JSONObject();
+            jsonOrders.put("orders", orderArray);
+            sb.append(jsonOrders.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        if (orders.getOrdersCount() > 0) {
-            sb.delete(sb.length() - 2, sb.length());
-        }
+        return putWhiteSpaces(sb).toString();
+    }
 
-        return sb.append("]}").toString();
+    private static StringBuilder putWhiteSpaces(StringBuilder sb) {
+        int i = 0;
+        while (i < sb.length()) {
+            if (sb.charAt(i) == ',' || sb.charAt(i) == ':') {
+                sb.insert(i + 1, ' ');
+                i++;
+            }
+            i++;
+        }
+        return sb;
+    }
+
+    private static JSONObject getOrder(Order order) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("id", order.getOrderId());
+            object.put("products", getProducts(order));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
+
+    private static JSONArray getProducts(Order order) {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < order.getProductsCount(); i++) {
+            array.put(getProduct(order.getProduct(i)));
+        }
+        return array;
+    }
+
+    private static JSONObject getProduct(Product product) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("code", product.getCode());
+            object.put("color", product.getColor());
+            if (product.getSize() != Size.NO_SIZE) {
+                object.put("size", product.getSize());
+            }
+            object.put("price", product.getPrice());
+            object.put("currency", product.getCurrency());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return object;
     }
 }
